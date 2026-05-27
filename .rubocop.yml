@@ -1,0 +1,11 @@
+inherit_gem:
+  rubocop-rails-omakase: rubocop.yml
+
+AllCops:
+  TargetRubyVersion: 4.0
+
+Layout/SpaceInsideArrayLiteralBrackets:
+  Enabled: false
+
+Style/StringLiterals:
+  EnforcedStyle: double_quotes

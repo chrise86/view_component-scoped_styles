@@ -1,0 +1,4 @@
+module ViewComponent
+  module ScopedStyles
+  end
+end

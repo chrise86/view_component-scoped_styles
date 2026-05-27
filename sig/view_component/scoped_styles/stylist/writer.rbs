@@ -1,0 +1,11 @@
+module ViewComponent
+  module ScopedStyles
+    class Stylist
+      class Writer
+        def self.print: (Class component_class) -> void
+
+        def print!: (Class component_class) -> void
+      end
+    end
+  end
+end

@@ -1,0 +1,9 @@
+# frozen_string_literal: true
+
+ViewComponent::ScopedStyles.configure do |config|
+  # Where ViewComponent classes live (relative to Rails.root). Default: "app/components"
+  config.components_path = <%= components_path_expression %>
+
+  # Optional @layer name for components.scoped.css (e.g. "components"). Default: nil.
+  config.components_layer = <%= components_layer_value %>
+end

@@ -1,0 +1,7 @@
+module ViewComponent
+  module ScopedStyles
+    class Stylist
+      def self.register: (Class component_class) -> void
+    end
+  end
+end

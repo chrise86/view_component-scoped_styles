@@ -1,0 +1,25 @@
+module ViewComponent
+  module ScopedStyles
+    extend ::ActiveSupport::Concern
+
+    CACHED_VARIABLES: Array[Symbol]
+    CLASS_SELECTOR_PATTERN: Regexp
+    COMPONENT_CSS_CLASS: String
+
+    interface _ClassMethods
+      def component_css_class: (?String name) -> void
+
+      def component_styles: () -> String?
+
+      def register_styles: () -> void
+
+      def has_stylesheet?: () -> bool
+
+      def styles: () ?{ () -> String } -> void
+    end
+
+    mixes_in_class_methods _ClassMethods
+
+    def component_class: (?(String | Symbol) name) -> String?
+  end
+end

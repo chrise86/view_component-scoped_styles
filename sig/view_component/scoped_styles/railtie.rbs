@@ -1,0 +1,13 @@
+module ViewComponent
+  module ScopedStyles
+    class Railtie < ::Rails::Railtie
+      class << self
+        def component_path: () -> ::Pathname
+
+        def load_and_register_components: () -> void
+
+        def register_components: () -> void
+      end
+    end
+  end
+end

@@ -1,0 +1,16 @@
+module ViewComponent
+  module ScopedStyles
+    class Configuration
+      attr_accessor components_path: String
+      attr_accessor components_layer: String?
+
+      def initialize: () -> void
+    end
+
+    class << self
+      def configuration: () -> Configuration
+
+      def configure: () { (Configuration) -> void } -> void
+    end
+  end
+end
