@@ -1,8 +1,17 @@
-## [Unreleased]
+## [0.2.0]
+
+### Added
+
+- `ignored_css_classes` to keep specific selectors unscoped in generated CSS; `component_class("name")` returns the original class name for ignored classes.
 
 ### Changed
 
-- Renamed gem to `view_component-scoped_styles` and module to `ViewComponent::ScopedStyles` (was `view_component-scoped_css` / `ViewComponent::ScopedCSS`).
+- Style registration and writes to `components.scoped.css` run only in development; production and test use the committed stylesheet.
+
+### Fixed
+
+- Require `digest` explicitly and qualify `Digest::MD5` so scoped class IDs generate correctly in test and other load orders.
+- Railtie development reload uses an initializer so `to_prepare` runs after Rails is fully loaded.
 
 ## [0.1.0] - 2026-05-27
 
