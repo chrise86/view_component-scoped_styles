@@ -15,8 +15,8 @@ module ViewComponent
 
     class_methods do
       # Sets which CSS class is the root for +component_class+ (no argument).
-      # Also triggers style registration when Rails is loaded (registration also
-      # runs via the Railtie for all styled components).
+      # Also triggers style registration in development when Rails is loaded
+      # (registration also runs via the Railtie for all styled components).
       #
       # All class selectors are rewritten to scoped names in +components.scoped.css+.
       # The primary class uses an id from the full stylesheet (e.g. +.icon+ → +.c-99d08d5a+);
@@ -60,8 +60,10 @@ module ViewComponent
         generate_component_styles
       end
 
-      # Writes this component's processed styles to the bundled or host stylesheet.
+      # Writes this component's processed styles to +components.scoped.css+.
+      # Only runs in development; production and test use the committed stylesheet.
       def register_styles
+        return unless register_styles_to_stylesheet?
         return unless @styles_block || has_stylesheet?
 
         Stylist.register(self)
@@ -86,10 +88,14 @@ module ViewComponent
       end
 
       def register_styles_if_rails_loaded
-        return unless defined?(Rails::Application) && Rails.application
+        return unless register_styles_to_stylesheet?
         return unless defined?(Rails::Server) # only web server boot path
 
         register_styles
+      end
+
+      def register_styles_to_stylesheet?
+        defined?(Rails::Application) && Rails.application && Rails.env.development?
       end
 
       def generate_component_styles

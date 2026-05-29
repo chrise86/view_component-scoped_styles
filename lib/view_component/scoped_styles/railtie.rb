@@ -7,6 +7,8 @@ module ViewComponent
   module ScopedStyles
     class Railtie < Rails::Railtie
       config.after_initialize do
+        next unless Rails.env.development?
+
         ViewComponent::ScopedStyles::Railtie.load_and_register_components
       end
 
