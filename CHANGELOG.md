@@ -13,6 +13,6 @@
 - Require `digest` explicitly and qualify `Digest::MD5` so scoped class IDs generate correctly in test and other load orders.
 - Railtie development reload uses an initializer so `to_prepare` runs after Rails is fully loaded.
 
-## [0.1.0] - 2026-05-27
+## [0.1.0] - 2026-05-28
 
 - Initial release
