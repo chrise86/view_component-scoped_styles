@@ -1,4 +1,4 @@
-# ViewComponent::ScopedStyles
+# ViewComponent::ScopedStyles [![Gem Version](https://badge.fury.io/rb/view_component-scoped_styles.svg)](https://badge.fury.io/rb/view_component-scoped_styles)
 
 Scoped, colocated CSS for [ViewComponent](https://viewcomponent.org/).
 
@@ -8,7 +8,7 @@ E.g. `.button` becomes `.c-a1b2c3d4`
 
 ## Table of Contents
 
-- [ViewComponent::ScopedStyles](#viewcomponentscopedstyles)
+- [ViewComponent::ScopedStyles ](#viewcomponentscopedstyles-)
   - [Table of Contents](#table-of-contents)
   - [Installation](#installation)
   - [Usage](#usage)
