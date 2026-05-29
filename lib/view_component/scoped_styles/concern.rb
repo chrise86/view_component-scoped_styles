@@ -117,10 +117,8 @@ module ViewComponent
         css_classes.index_with do |css_class|
           if ignored_css_class?(css_class)
             css_class
-          elsif css_class == primary_class
-            @component_id
           else
-            generate_scoped_class_id(styles_content, css_class)
+            generate_scoped_class_id(styles_content, css_class, primary_class)
           end
         end
       end
@@ -141,7 +139,7 @@ module ViewComponent
         if ignored_css_class?(primary_class)
           primary_class
         else
-          generate_component_id(styles_content)
+          generate_scoped_class_id(styles_content, primary_class, primary_class)
         end
       end
 
@@ -149,14 +147,10 @@ module ViewComponent
         self::IGNORED_CSS_CLASSES.include?(css_class)
       end
 
-      def generate_component_id(styles_content)
-        hash = Digest::MD5.hexdigest(styles_content)[0..7]
-
-        "c-#{hash}"
-      end
-
-      def generate_scoped_class_id(styles_content, css_class)
-        hash = Digest::MD5.hexdigest("#{styles_content}:#{css_class}")[0..7]
+      def generate_scoped_class_id(styles_content, css_class, primary_class)
+        is_primary = css_class == primary_class
+        input = is_primary ? styles_content : "#{styles_content}:#{css_class}"
+        hash = Digest::MD5.hexdigest(input)[0..7]
 
         "c-#{hash}"
       end
