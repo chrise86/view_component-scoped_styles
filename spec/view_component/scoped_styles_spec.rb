@@ -5,6 +5,65 @@ RSpec.describe ViewComponent::ScopedStyles do
     expect(ViewComponent::ScopedStyles::VERSION).not_to be nil
   end
 
+  describe "css_class_prefix" do
+    after do
+      ViewComponent::ScopedStyles.configuration.css_class_prefix = "c-"
+    end
+
+    let(:component_class) do
+      Class.new do
+        def self.name = "PrefixedComponent"
+
+        include ViewComponent::ScopedStyles
+
+        styles do
+          <<~CSS
+            .component {
+              color: red;
+            }
+          CSS
+        end
+      end
+    end
+
+    it "uses the global configuration prefix by default" do
+      ViewComponent::ScopedStyles.configuration.css_class_prefix = "vc-"
+      css = component_class.component_styles
+
+      expect(css).to match(/\.vc-[0-9a-f]{8}\s*\{[^}]*color: red/)
+    end
+
+    it "uses a per-component prefix when css_class_prefix is set" do
+      prefixed_component = Class.new do
+        def self.name = "PrefixedComponent"
+
+        include ViewComponent::ScopedStyles
+
+        css_class_prefix "my-"
+
+        styles do
+          <<~CSS
+            .component {
+              color: red;
+            }
+          CSS
+        end
+      end
+
+      css = prefixed_component.component_styles
+
+      expect(css).to match(/\.my-[0-9a-f]{8}\s*\{[^}]*color: red/)
+    end
+
+    it "returns scoped names with the configured prefix from component_class" do
+      ViewComponent::ScopedStyles.configuration.css_class_prefix = "vc-"
+      component_class.component_styles
+      instance = component_class.new
+
+      expect(instance.component_class).to match(/\Avc-[0-9a-f]{8}\z/)
+    end
+  end
+
   describe "ignored_css_classes" do
     let(:component_class) do
       Class.new do

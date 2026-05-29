@@ -161,6 +161,22 @@ end
 </div>
 ```
 
+Scoped class names are prefixed by default (e.g. `c-a1b2c3d4`). Set a global prefix in configuration, or override per component with `css_class_prefix`:
+
+```ruby
+class ExampleComponent < ViewComponent::Base
+  include ViewComponent::ScopedStyles
+
+  css_class_prefix "vc-"
+
+  styles do
+    <<~CSS
+      .component { ... }  # becomes .vc-a1b2c3d4 in components.scoped.css
+    CSS
+  end
+end
+```
+
 ### Ignoring classes
 
 Ignored classes are left unchanged in generated CSS:
@@ -219,6 +235,9 @@ ViewComponent::ScopedStyles.configure do |config|
 
   # Optional @layer name for components.scoped.css (e.g. "components"). Default: nil.
   config.components_layer = nil
+
+  # Prefix for scoped class names (e.g. "c-" produces "c-a1b2c3d4"). Default: "c-"
+  config.css_class_prefix = "c-"
 end
 ```
 
@@ -226,6 +245,7 @@ end
 | --- | --- | --- |
 | `components_path` | `"app/components"` | Where ViewComponent classes live, relative to `Rails.root`. |
 | `components_layer` | `nil` | When set, wraps generated CSS in `@layer <name> { ... }` for cascade control. |
+| `css_class_prefix` | `"c-"` | Prefix prepended to scoped class names (e.g. `"vc-"` → `"vc-a1b2c3d4"`). |
 
 ## Related projects
 

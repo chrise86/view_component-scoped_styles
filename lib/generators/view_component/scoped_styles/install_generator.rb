@@ -34,6 +34,10 @@ module ViewComponent
         def components_layer_value
           configuration_defaults.components_layer.inspect
         end
+
+        def css_class_prefix_value
+          configuration_defaults.css_class_prefix.inspect
+        end
       end
     end
   end

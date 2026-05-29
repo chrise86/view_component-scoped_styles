@@ -3,6 +3,7 @@ module ViewComponent
     class Configuration
       attr_accessor components_path: String
       attr_accessor components_layer: String?
+      attr_accessor css_class_prefix: String
 
       def initialize: () -> void
     end

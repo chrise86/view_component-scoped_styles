@@ -12,6 +12,8 @@ module ViewComponent
 
       def ignored_css_classes: (*String | Symbol classes) -> void
 
+      def css_class_prefix: (?String prefix) -> void
+
       def component_styles: () -> String?
 
       def register_styles: () -> void

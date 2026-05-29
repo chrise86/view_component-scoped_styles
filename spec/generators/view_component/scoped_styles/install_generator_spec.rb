@@ -32,5 +32,6 @@ RSpec.describe ViewComponent::ScopedStyles::Generators::InstallGenerator do
       %(config.components_path = File.join("app", "components"))
     )
     expect(content).to include("config.components_layer = #{defaults.components_layer.inspect}")
+    expect(content).to include("config.css_class_prefix = #{defaults.css_class_prefix.inspect}")
   end
 end

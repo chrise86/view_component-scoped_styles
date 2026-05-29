@@ -1,3 +1,9 @@
+## [0.3.0] - 2026-05-29
+
+### Added
+
+- `css_class_prefix` global configuration option and per-component `css_class_prefix` method to customize the prefix for scoped class names (default: `"c-"`).
+
 ## [0.2.0] - 2026-05-29
 
 ### Added

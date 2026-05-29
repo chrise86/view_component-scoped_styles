@@ -6,4 +6,7 @@ ViewComponent::ScopedStyles.configure do |config|
 
   # Optional @layer name for components.scoped.css (e.g. "components"). Default: nil.
   config.components_layer = <%= components_layer_value %>
+
+  # Prefix for scoped class names (e.g. "c-" produces "c-a1b2c3d4"). Default: "c-"
+  config.css_class_prefix = <%= css_class_prefix_value %>
 end

@@ -52,6 +52,21 @@ module ViewComponent
         register_styles_if_rails_loaded
       end
 
+      # Sets the prefix for scoped class names on this component (e.g. +"vc-"+ → +"vc-a1b2c3d4"+).
+      #
+      # Overrides {ViewComponent::ScopedStyles.configuration}.css_class_prefix for this component.
+      #
+      # Clears cached generated styles when +prefix+ changes.
+      #
+      # @param prefix [String, nil] prefix without a hash suffix (e.g. +"c-"+, +"vc-"+)
+      def css_class_prefix(prefix = nil)
+        if prefix
+          const_set(:CSS_CLASS_PREFIX, prefix.to_s)
+          clear_component_style_cache
+        end
+        register_styles_if_rails_loaded
+      end
+
       # Returns processed CSS with scoped class selectors, or +nil+ if none.
       def component_styles
         return @component_styles if defined?(@component_styles)
@@ -160,7 +175,15 @@ module ViewComponent
         input = is_primary ? styles_content : "#{styles_content}:#{css_class}"
         hash = ::Digest::MD5.hexdigest(input)[0..7]
 
-        "c-#{hash}"
+        "#{scoped_css_class_prefix}#{hash}"
+      end
+
+      def scoped_css_class_prefix
+        if const_defined?(:CSS_CLASS_PREFIX, false)
+          self::CSS_CLASS_PREFIX
+        else
+          ViewComponent::ScopedStyles.configuration.css_class_prefix
+        end
       end
 
       def clear_component_style_cache

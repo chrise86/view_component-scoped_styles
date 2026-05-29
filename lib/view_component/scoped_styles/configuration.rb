@@ -25,9 +25,15 @@ module ViewComponent
       # @return [String, nil] default: +nil+ (no layer wrapper)
       attr_accessor :components_layer
 
+      # Prefix prepended to scoped class names (e.g. +"c-"+ → +"c-a1b2c3d4"+).
+      #
+      # @return [String] default: +"c-"+
+      attr_accessor :css_class_prefix
+
       def initialize
         @components_path = File.join("app", "components")
         @components_layer = nil
+        @css_class_prefix = "c-"
       end
     end
 
