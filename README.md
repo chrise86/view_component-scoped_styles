@@ -15,6 +15,7 @@ E.g. `.button` becomes `.c-a1b2c3d4`
     - [1. Using a sidecar stylesheet](#1-using-a-sidecar-stylesheet)
     - [2. Using a styles block in the component](#2-using-a-styles-block-in-the-component)
     - [Referencing classes](#referencing-classes)
+    - [Ignoring classes](#ignoring-classes)
     - [Using the scoped CSS](#using-the-scoped-css)
   - [Configuration](#configuration)
   - [Related projects](#related-projects)
@@ -158,6 +159,33 @@ end
     Inner content
   </div>
 </div>
+```
+
+### Ignoring classes
+
+Ignored classes are left unchanged in generated CSS:
+
+```ruby
+class ExampleComponent < ViewComponent::Base
+  include ViewComponent::ScopedStyles
+
+  ignored_css_classes "is-open", "active"
+
+  styles do
+    <<~CSS
+      .component { ... }
+      .is-open { ... }  # stays .is-open in components.scoped.css
+    CSS
+  end
+end
+```
+In your view, you can either reference the class directly:
+```erb
+<div class="<%= component_class %> is-open">
+```
+or via the `component_class` helper:
+```erb
+<div class="<%= component_class %> <%= component_class("is-open") %>">
 ```
 
 ### Using the scoped CSS

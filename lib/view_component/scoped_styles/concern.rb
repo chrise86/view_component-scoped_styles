@@ -9,6 +9,7 @@ module ViewComponent
 
     # Default root class for +component_class+ when it matches a selector in the CSS.
     COMPONENT_CSS_CLASS = "component".freeze
+    IGNORED_CSS_CLASSES = [].freeze
 
     class_methods do
       # Sets which CSS class is the root for +component_class+ (no argument).
@@ -26,7 +27,24 @@ module ViewComponent
       # @param name [String, nil] selector name without a leading dot (e.g. +"icon"+)
       def component_css_class(name = nil)
         if name
-          const_set(:COMPONENT_CSS_CLASS, name)
+          const_set(:COMPONENT_CSS_CLASS, name.to_s)
+          clear_component_style_cache
+        end
+        register_styles_if_rails_loaded
+      end
+
+      # Declares CSS class selectors that are not rewritten to scoped names.
+      #
+      # Ignored classes stay in +components.scoped.css+ as written (e.g. +.is-open+).
+      # +component_class("is-open")+ returns the original name.
+      #
+      # Clears cached generated styles when the list changes.
+      #
+      # @param classes [String, Symbol] selector names without a leading dot
+      def ignored_css_classes(*classes)
+        if classes.any?
+          names = classes.flatten.map { |css_class| css_class.to_s.delete_prefix(".") }
+          const_set(:IGNORED_CSS_CLASSES, names.freeze)
           clear_component_style_cache
         end
         register_styles_if_rails_loaded
@@ -77,7 +95,7 @@ module ViewComponent
         css_classes = extract_css_classes(styles_content)
         primary_class = primary_css_class(css_classes)
 
-        @component_id = generate_component_id(styles_content)
+        @component_id = component_id_for(primary_class, styles_content)
         @component_class_map = build_component_class_map(styles_content, css_classes, primary_class)
         @component_styles = replace_css_classes(styles_content, @component_class_map)
       end
@@ -97,7 +115,9 @@ module ViewComponent
 
       def build_component_class_map(styles_content, css_classes, primary_class)
         css_classes.index_with do |css_class|
-          if css_class == primary_class
+          if ignored_css_class?(css_class)
+            css_class
+          elsif css_class == primary_class
             @component_id
           else
             generate_scoped_class_id(styles_content, css_class)
@@ -106,9 +126,27 @@ module ViewComponent
       end
 
       def replace_css_classes(styles_content, class_map)
-        class_map.keys.sort_by(&:length).reverse.reduce(styles_content) do |content, css_class|
+        scoped_map = class_map.reject do |css_class, scoped|
+          css_class == scoped
+        end
+
+        sorted_classes = scoped_map.keys.sort_by(&:length).reverse
+
+        sorted_classes.reduce(styles_content) do |content, css_class|
           content.gsub(/\.#{Regexp.escape(css_class)}\b/, ".#{class_map[css_class]}")
         end
+      end
+
+      def component_id_for(primary_class, styles_content)
+        if ignored_css_class?(primary_class)
+          primary_class
+        else
+          generate_component_id(styles_content)
+        end
+      end
+
+      def ignored_css_class?(css_class)
+        self::IGNORED_CSS_CLASSES.include?(css_class)
       end
 
       def generate_component_id(styles_content)

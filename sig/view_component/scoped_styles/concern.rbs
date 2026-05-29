@@ -5,9 +5,12 @@ module ViewComponent
     CACHED_VARIABLES: Array[Symbol]
     CLASS_SELECTOR_PATTERN: Regexp
     COMPONENT_CSS_CLASS: String
+    IGNORED_CSS_CLASSES: Array[String]
 
     interface _ClassMethods
       def component_css_class: (?String name) -> void
+
+      def ignored_css_classes: (*String | Symbol classes) -> void
 
       def component_styles: () -> String?
 
