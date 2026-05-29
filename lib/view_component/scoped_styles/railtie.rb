@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+require "active_support/core_ext/module/delegation"
 require "rails/railtie"
 
 module ViewComponent
@@ -9,8 +10,10 @@ module ViewComponent
         ViewComponent::ScopedStyles::Railtie.load_and_register_components
       end
 
-      if Rails.env.development?
-        config.to_prepare do
+      initializer "view_component.scoped_styles.reload" do |app|
+        next unless Rails.env.development?
+
+        app.config.to_prepare do
           ViewComponent::ScopedStyles::Railtie.register_components
         end
       end

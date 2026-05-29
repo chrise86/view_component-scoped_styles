@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require "digest"
+
 module ViewComponent
   module ScopedStyles
     extend ActiveSupport::Concern
@@ -84,7 +86,7 @@ module ViewComponent
       end
 
       def register_styles_if_rails_loaded
-        return unless defined?(Rails) && Rails.root
+        return unless defined?(Rails::Application) && Rails.application
         return unless defined?(Rails::Server) # only web server boot path
 
         register_styles
@@ -150,7 +152,7 @@ module ViewComponent
       def generate_scoped_class_id(styles_content, css_class, primary_class)
         is_primary = css_class == primary_class
         input = is_primary ? styles_content : "#{styles_content}:#{css_class}"
-        hash = Digest::MD5.hexdigest(input)[0..7]
+        hash = ::Digest::MD5.hexdigest(input)[0..7]
 
         "c-#{hash}"
       end
