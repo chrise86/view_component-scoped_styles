@@ -206,7 +206,7 @@ or via the `component_class` helper:
 
 ### Using the scoped CSS
 
-All scoped CSS will be compiled into `app/assets/stylesheets/components.scoped.css`.
+All scoped CSS will be compiled into a single bundled stylesheet. By default that is `app/assets/stylesheets/components.scoped.css`; both the directory and filename are configurable (see [Configuration](#configuration)).
 
 You should import this stylesheet within your app:
 
@@ -233,7 +233,13 @@ ViewComponent::ScopedStyles.configure do |config|
   # Where ViewComponent classes live (relative to Rails.root). Default: "app/components"
   config.components_path = File.join("app", "components")
 
-  # Optional @layer name for components.scoped.css (e.g. "components"). Default: nil.
+  # Where the bundled scoped stylesheet is written (relative to Rails.root). Default: "app/assets/stylesheets"
+  config.assets_path = File.join("app", "assets", "stylesheets")
+
+  # Filename of the bundled scoped stylesheet. Default: "components.scoped.css"
+  config.stylesheet_name = "components.scoped.css"
+
+  # Optional @layer name for the bundled scoped stylesheet (e.g. "components"). Default: nil.
   config.components_layer = nil
 
   # Prefix for scoped class names (e.g. "c-" produces "c-a1b2c3d4"). Default: "c-"
@@ -244,6 +250,8 @@ end
 | Option | Default | Description |
 | --- | --- | --- |
 | `components_path` | `"app/components"` | Where ViewComponent classes live, relative to `Rails.root`. |
+| `assets_path` | `"app/assets/stylesheets"` | Directory where the bundled scoped stylesheet is written, relative to `Rails.root`. |
+| `stylesheet_name` | `"components.scoped.css"` | Filename of the bundled scoped stylesheet within `assets_path`. |
 | `components_layer` | `nil` | When set, wraps generated CSS in `@layer <name> { ... }` for cascade control. |
 | `css_class_prefix` | `"c-"` | Prefix prepended to scoped class names (e.g. `"vc-"` → `"vc-a1b2c3d4"`). |
 

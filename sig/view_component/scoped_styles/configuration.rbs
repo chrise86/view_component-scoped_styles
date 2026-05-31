@@ -2,6 +2,8 @@ module ViewComponent
   module ScopedStyles
     class Configuration
       attr_accessor components_path: String
+      attr_accessor assets_path: String
+      attr_accessor stylesheet_name: String
       attr_accessor components_layer: String?
       attr_accessor css_class_prefix: String
 

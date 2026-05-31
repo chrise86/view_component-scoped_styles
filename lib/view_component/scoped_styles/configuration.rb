@@ -8,6 +8,8 @@ module ViewComponent
     #
     #   ViewComponent::ScopedStyles.configure do |config|
     #     config.components_path = File.join("app", "view_components")
+    #     config.assets_path = File.join("app", "assets", "stylesheets")
+    #     config.stylesheet_name = "components.scoped.css"
     #     config.components_layer = "components"
     #   end
     class Configuration
@@ -16,8 +18,17 @@ module ViewComponent
       # @return [String] default: +"app/components"+
       attr_accessor :components_path
 
-      # Optional CSS cascade layer name for generated styles in
-      # +app/assets/stylesheets/components.scoped.css+.
+      # Directory where the bundled scoped stylesheet is written, relative to {Rails.root}.
+      #
+      # @return [String] default: +"app/assets/stylesheets"+
+      attr_accessor :assets_path
+
+      # Filename of the bundled scoped stylesheet within {assets_path}.
+      #
+      # @return [String] default: +"components.scoped.css"+
+      attr_accessor :stylesheet_name
+
+      # Optional CSS cascade layer name for the bundled scoped stylesheet.
       #
       # When set, the bundled stylesheet is wrapped in +@layer <name> { ... }+ so
       # you can control specificity relative to other layers in your app.
@@ -32,6 +43,8 @@ module ViewComponent
 
       def initialize
         @components_path = File.join("app", "components")
+        @assets_path = File.join("app", "assets", "stylesheets")
+        @stylesheet_name = "components.scoped.css"
         @components_layer = nil
         @css_class_prefix = "c-"
       end

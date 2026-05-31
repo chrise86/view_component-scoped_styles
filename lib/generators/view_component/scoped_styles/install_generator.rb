@@ -27,8 +27,15 @@ module ViewComponent
         end
 
         def components_path_expression
-          segments = Pathname(configuration_defaults.components_path).each_filename.to_a
-          "File.join(#{segments.map { |segment| %("#{segment}") }.join(", ")})"
+          path_expression_for(configuration_defaults.components_path)
+        end
+
+        def assets_path_expression
+          path_expression_for(configuration_defaults.assets_path)
+        end
+
+        def stylesheet_name_value
+          configuration_defaults.stylesheet_name.inspect
         end
 
         def components_layer_value
@@ -37,6 +44,11 @@ module ViewComponent
 
         def css_class_prefix_value
           configuration_defaults.css_class_prefix.inspect
+        end
+
+        def path_expression_for(path)
+          segments = Pathname(path).each_filename.to_a
+          "File.join(#{segments.map { |segment| %("#{segment}") }.join(", ")})"
         end
       end
     end

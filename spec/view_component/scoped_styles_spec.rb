@@ -5,6 +5,15 @@ RSpec.describe ViewComponent::ScopedStyles do
     expect(ViewComponent::ScopedStyles::VERSION).not_to be nil
   end
 
+  describe "Configuration" do
+    it "defaults assets_path and stylesheet_name" do
+      config = ViewComponent::ScopedStyles::Configuration.new
+
+      expect(config.assets_path).to eq(File.join("app", "assets", "stylesheets"))
+      expect(config.stylesheet_name).to eq("components.scoped.css")
+    end
+  end
+
   describe "css_class_prefix" do
     after do
       ViewComponent::ScopedStyles.configuration.css_class_prefix = "c-"

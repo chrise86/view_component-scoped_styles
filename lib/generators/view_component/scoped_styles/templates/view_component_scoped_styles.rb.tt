@@ -4,7 +4,13 @@ ViewComponent::ScopedStyles.configure do |config|
   # Where ViewComponent classes live (relative to Rails.root). Default: "app/components"
   config.components_path = <%= components_path_expression %>
 
-  # Optional @layer name for components.scoped.css (e.g. "components"). Default: nil.
+  # Where the bundled scoped stylesheet is written (relative to Rails.root). Default: "app/assets/stylesheets"
+  config.assets_path = <%= assets_path_expression %>
+
+  # Filename of the bundled scoped stylesheet. Default: "components.scoped.css"
+  config.stylesheet_name = <%= stylesheet_name_value %>
+
+  # Optional @layer name for the bundled scoped stylesheet (e.g. "components"). Default: nil.
   config.components_layer = <%= components_layer_value %>
 
   # Prefix for scoped class names (e.g. "c-" produces "c-a1b2c3d4"). Default: "c-"
