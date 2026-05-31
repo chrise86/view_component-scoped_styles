@@ -1,3 +1,9 @@
+## [0.4.0] - 2026-05-31
+
+### Added
+
+- `assets_path` and `stylesheet_name` global configuration options to customize where the bundled scoped stylesheet is written (defaults: `app/assets/stylesheets` and `components.scoped.css`).
+
 ## [0.3.0] - 2026-05-29
 
 ### Added
