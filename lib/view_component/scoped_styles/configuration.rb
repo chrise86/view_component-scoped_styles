@@ -36,9 +36,19 @@ module ViewComponent
       # @return [String, nil] default: +nil+ (no layer wrapper)
       attr_accessor :components_layer
 
-      # Prefix prepended to scoped class names (e.g. +"c-"+ → +"c-a1b2c3d4"+).
+      # Prefix prepended to scoped class names.
       #
-      # @return [String] default: +"c-"+
+      # Supports template variables:
+      #
+      # * +{component_name}+ — component name with namespaces joined by +/+
+      # * +{class_name}+ — the CSS class being scoped
+      #
+      # Example: +"{class_name}_"+ with +.component+ → +"component_a1b2c3d4"+.
+      #
+      # To maintain compatibility with versions < 0.5.0 and avoid rewriting
+      # existing stylesheets, set this to +"c-"+.
+      #
+      # @return [String] default: +"{class_name}_"+
       attr_accessor :css_class_prefix
 
       def initialize
@@ -46,7 +56,7 @@ module ViewComponent
         @assets_path = File.join("app", "assets", "stylesheets")
         @stylesheet_name = "components.scoped.css"
         @components_layer = nil
-        @css_class_prefix = "c-"
+        @css_class_prefix = "{class_name}_"
       end
     end
 

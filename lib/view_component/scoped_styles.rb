@@ -2,6 +2,7 @@
 
 require_relative "scoped_styles/version"
 require_relative "scoped_styles/configuration"
+require_relative "scoped_styles/css_class_prefix"
 require "active_support/concern"
 require_relative "scoped_styles/concern"
 require_relative "scoped_styles/stylist"

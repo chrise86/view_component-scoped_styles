@@ -13,11 +13,17 @@ RSpec.describe ViewComponent::ScopedStyles do
       expect(config.assets_path).to eq(File.join("app", "assets", "stylesheets"))
       expect(config.stylesheet_name).to eq("components.scoped.css")
     end
+
+    it "defaults css_class_prefix to {class_name}_" do
+      config = ViewComponent::ScopedStyles::Configuration.new
+
+      expect(config.css_class_prefix).to eq("{class_name}_")
+    end
   end
 
   describe "css_class_prefix" do
     after do
-      ViewComponent::ScopedStyles.configuration.css_class_prefix = "c-"
+      ViewComponent::ScopedStyles.configuration.css_class_prefix = "{class_name}_"
     end
 
     let(:component_class) do
@@ -41,6 +47,36 @@ RSpec.describe ViewComponent::ScopedStyles do
       css = component_class.component_styles
 
       expect(css).to match(/\.vc-[0-9a-f]{8}\s*\{[^}]*color: red/)
+    end
+
+    it "interpolates {class_name} in the default prefix" do
+      css = component_class.component_styles
+
+      expect(css).to match(/\.component_[0-9a-f]{8}\s*\{[^}]*color: red/)
+    end
+
+    it "interpolates {component_name} and escapes / in compiled CSS" do
+      ViewComponent::ScopedStyles.configuration.css_class_prefix = "{component_name}_{class_name}_"
+
+      namespaced_component = Class.new do
+        def self.name = "Admin::UserCardComponent"
+
+        include ViewComponent::ScopedStyles
+
+        styles do
+          <<~CSS
+            .component {
+              color: red;
+            }
+          CSS
+        end
+      end
+
+      css = namespaced_component.component_styles
+      instance = namespaced_component.new
+
+      expect(css).to match(/\.Admin\\\/UserCardComponent_component_[0-9a-f]{8}\s*\{[^}]*color: red/)
+      expect(instance.component_class).to match(/\AAdmin\/UserCardComponent_component_[0-9a-f]{8}\z/)
     end
 
     it "uses a per-component prefix when css_class_prefix is set" do
@@ -116,8 +152,8 @@ RSpec.describe ViewComponent::ScopedStyles do
     it "still scopes non-ignored selectors" do
       css = component_class.component_styles
 
-      expect(css).to match(/\.c-[0-9a-f]{8}\s*\{[^}]*color: red/)
-      expect(css).to match(/\.c-[0-9a-f]{8}\s*\{[^}]*margin: 0/)
+      expect(css).to match(/\.component_[0-9a-f]{8}\s*\{[^}]*color: red/)
+      expect(css).to match(/\.scoped_[0-9a-f]{8}\s*\{[^}]*margin: 0/)
     end
 
     it "returns original names from component_class for ignored selectors" do
@@ -132,7 +168,7 @@ RSpec.describe ViewComponent::ScopedStyles do
       component_class.component_styles
       instance = component_class.new
 
-      expect(instance.component_class("scoped")).to match(/\Ac-[0-9a-f]{8}\z/)
+      expect(instance.component_class("scoped")).to match(/\Ascoped_[0-9a-f]{8}\z/)
     end
   end
 end

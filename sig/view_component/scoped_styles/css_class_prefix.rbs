@@ -1,0 +1,12 @@
+module ViewComponent
+  module ScopedStyles
+    class CssClassPrefix
+      VARIABLES: Array[String]
+      VARIABLE_PATTERN: Regexp
+
+      def self.interpolate: (String template, component_name: String, class_name: String) -> String
+
+      def self.escape_for_css_selector: (String class_name) -> String
+    end
+  end
+end

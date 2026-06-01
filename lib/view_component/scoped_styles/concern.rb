@@ -52,13 +52,14 @@ module ViewComponent
         register_styles_if_rails_loaded
       end
 
-      # Sets the prefix for scoped class names on this component (e.g. +"vc-"+ → +"vc-a1b2c3d4"+).
+      # Sets the prefix template for scoped class names on this component.
       #
       # Overrides {ViewComponent::ScopedStyles.configuration}.css_class_prefix for this component.
+      # Supports +{component_name}+ and +{class_name}+ template variables.
       #
       # Clears cached generated styles when +prefix+ changes.
       #
-      # @param prefix [String, nil] prefix without a hash suffix (e.g. +"c-"+, +"vc-"+)
+      # @param prefix [String, nil] prefix template without a hash suffix (e.g. +"{class_name}_"+)
       def css_class_prefix(prefix = nil)
         if prefix
           const_set(:CSS_CLASS_PREFIX, prefix.to_s)
@@ -154,7 +155,9 @@ module ViewComponent
         sorted_classes = scoped_map.keys.sort_by(&:length).reverse
 
         sorted_classes.reduce(styles_content) do |content, css_class|
-          content.gsub(/\.#{Regexp.escape(css_class)}\b/, ".#{class_map[css_class]}")
+          scoped = class_map[css_class]
+          escaped = CssClassPrefix.escape_for_css_selector(scoped)
+          content.gsub(/\.#{Regexp.escape(css_class)}\b/, ".#{escaped}")
         end
       end
 
@@ -175,7 +178,18 @@ module ViewComponent
         input = is_primary ? styles_content : "#{styles_content}:#{css_class}"
         hash = ::Digest::MD5.hexdigest(input)[0..7]
 
-        "#{scoped_css_class_prefix}#{hash}"
+        prefix = CssClassPrefix.interpolate(
+          scoped_css_class_prefix,
+          component_name: scoped_component_name,
+          class_name: css_class
+        )
+        "#{prefix}#{hash}"
+      end
+
+      def scoped_component_name
+        return "" unless name
+
+        name.split("::").join("/")
       end
 
       def scoped_css_class_prefix
