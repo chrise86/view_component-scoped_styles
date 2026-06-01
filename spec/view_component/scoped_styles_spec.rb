@@ -75,8 +75,31 @@ RSpec.describe ViewComponent::ScopedStyles do
       css = namespaced_component.component_styles
       instance = namespaced_component.new
 
-      expect(css).to match(/\.Admin\\\/UserCardComponent_component_[0-9a-f]{8}\s*\{[^}]*color: red/)
-      expect(instance.component_class).to match(/\AAdmin\/UserCardComponent_component_[0-9a-f]{8}\z/)
+      expect(css).to match(/\.Admin\\\/UserCard_component_[0-9a-f]{8}\s*\{[^}]*color: red/)
+      expect(instance.component_class).to match(/\AAdmin\/UserCard_component_[0-9a-f]{8}\z/)
+    end
+
+    it "strips the Component suffix from {component_name}" do
+      ViewComponent::ScopedStyles.configuration.css_class_prefix = "{component_name}_{class_name}_"
+
+      cool_button = Class.new do
+        def self.name = "CoolButtonComponent"
+
+        include ViewComponent::ScopedStyles
+
+        styles do
+          <<~CSS
+            .component {
+              color: blue;
+            }
+          CSS
+        end
+      end
+
+      cool_button.component_styles
+      instance = cool_button.new
+
+      expect(instance.component_class).to match(/\ACoolButton_component_[0-9a-f]{8}\z/)
     end
 
     it "uses a per-component prefix when css_class_prefix is set" do

@@ -15,21 +15,21 @@ RSpec.describe ViewComponent::ScopedStyles::CssClassPrefix do
     it "replaces {component_name} with namespaces joined by /" do
       result = described_class.interpolate(
         "{component_name}/",
-        component_name: "Admin/UserCardComponent",
+        component_name: "Admin/UserCard",
         class_name: "component"
       )
 
-      expect(result).to eq("Admin/UserCardComponent/")
+      expect(result).to eq("Admin/UserCard/")
     end
 
     it "replaces multiple variables" do
       result = described_class.interpolate(
         "{component_name}_{class_name}_",
-        component_name: "Admin/UserCardComponent",
+        component_name: "Admin/UserCard",
         class_name: "inner"
       )
 
-      expect(result).to eq("Admin/UserCardComponent_inner_")
+      expect(result).to eq("Admin/UserCard_inner_")
     end
 
     it "leaves unknown placeholders unchanged" do

@@ -12,7 +12,8 @@ module ViewComponent
         # Replaces +{component_name}+ and +{class_name}+ in +template+.
         #
         # @param template [String] prefix template (e.g. +"{class_name}_"+)
-        # @param component_name [String] component name with namespaces joined by +/+
+        # @param component_name [String] component name with namespaces joined by +/+,
+        #   and a trailing +Component+ suffix removed
         # @param class_name [String] CSS class being scoped
         # @return [String]
         def interpolate(template, component_name:, class_name:)

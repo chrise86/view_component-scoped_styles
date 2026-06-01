@@ -40,7 +40,8 @@ module ViewComponent
       #
       # Supports template variables:
       #
-      # * +{component_name}+ — component name with namespaces joined by +/+
+      # * +{component_name}+ — component name with namespaces joined by +/+,
+      #   and a trailing +Component+ suffix removed
       # * +{class_name}+ — the CSS class being scoped
       #
       # Example: +"{class_name}_"+ with +.component+ → +"component_a1b2c3d4"+.

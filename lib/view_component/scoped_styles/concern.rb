@@ -189,7 +189,9 @@ module ViewComponent
       def scoped_component_name
         return "" unless name
 
-        name.split("::").join("/")
+        parts = name.split("::")
+        parts[-1] = parts[-1].delete_suffix("Component")
+        parts.join("/")
       end
 
       def scoped_css_class_prefix

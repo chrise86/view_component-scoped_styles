@@ -4,7 +4,7 @@ Scoped, colocated CSS for [ViewComponent](https://viewcomponent.org/).
 
 Avoids collisions by rewriting class selectors to stable, content-derived names.
 
-E.g. `.button` becomes `.c-a1b2c3d4`
+E.g. `.button` becomes `.button_a1b2c3d4`
 
 ## Table of Contents
 
@@ -161,21 +161,49 @@ end
 </div>
 ```
 
-Scoped class names are prefixed by default (e.g. `c-a1b2c3d4`). Set a global prefix in configuration, or override per component with `css_class_prefix`:
+Scoped class names are prefixed by default using the class name (e.g. `.component` → `component_a1b2c3d4`). Set a global prefix in configuration, or override per component with `css_class_prefix`.
+
+The prefix is a template string. Use `{class_name}` for the CSS class being scoped and `{component_name}` for the component name (namespaces joined by `/`, with a trailing `Component` suffix removed):
+
+```ruby
+ViewComponent::ScopedStyles.configure do |config|
+  config.css_class_prefix = "{class_name}_"  # default
+end
+```
 
 ```ruby
 class ExampleComponent < ViewComponent::Base
   include ViewComponent::ScopedStyles
 
-  css_class_prefix "vc-"
+  css_class_prefix "vc-{class_name}_"
 
   styles do
     <<~CSS
-      .component { ... }  # becomes .vc-a1b2c3d4 in components.scoped.css
+      .component { ... }  # becomes .vc-component_a1b2c3d4 in components.scoped.css
     CSS
   end
 end
 ```
+
+Namespaced components can include the component name in the prefix:
+
+```ruby
+class Admin::UserCardComponent < ViewComponent::Base
+  include ViewComponent::ScopedStyles
+
+  css_class_prefix "{component_name}_{class_name}_"
+
+  styles do
+    <<~CSS
+      .component { ... }
+      # Admin/UserCardComponent_component_a1b2c3d4 in templates;
+      # Admin\/UserCardComponent_component_a1b2c3d4 in components.scoped.css
+    CSS
+  end
+end
+```
+
+**Upgrading from 0.4.x:** set `config.css_class_prefix = "c-"` (and per-component overrides) to keep the previous `c-a1b2c3d4` class names without updating templates.
 
 ### Ignoring classes
 
@@ -242,8 +270,8 @@ ViewComponent::ScopedStyles.configure do |config|
   # Optional @layer name for the bundled scoped stylesheet (e.g. "components"). Default: nil.
   config.components_layer = nil
 
-  # Prefix for scoped class names (e.g. "c-" produces "c-a1b2c3d4"). Default: "c-"
-  config.css_class_prefix = "c-"
+  # Prefix for scoped class names. Supports {component_name} and {class_name}. Default: "{class_name}_"
+  config.css_class_prefix = "{class_name}_"
 end
 ```
 
@@ -253,7 +281,7 @@ end
 | `assets_path` | `"app/assets/stylesheets"` | Directory where the bundled scoped stylesheet is written, relative to `Rails.root`. |
 | `stylesheet_name` | `"components.scoped.css"` | Filename of the bundled scoped stylesheet within `assets_path`. |
 | `components_layer` | `nil` | When set, wraps generated CSS in `@layer <name> { ... }` for cascade control. |
-| `css_class_prefix` | `"c-"` | Prefix prepended to scoped class names (e.g. `"vc-"` → `"vc-a1b2c3d4"`). |
+| `css_class_prefix` | `"{class_name}_"` | Prefix template for scoped class names. Supports `{class_name}` and `{component_name}` (namespaces joined by `/`, `Component` suffix stripped; e.g. `.component` → `component_a1b2c3d4`). Use `"c-"` to match 0.4.x behavior. |
 
 ## Related projects
 
