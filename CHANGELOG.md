@@ -2,7 +2,7 @@
 
 ### Breaking changes
 
-**This release is incompatible with 0.4.x.** Scoped class names and compiled CSS selectors change unless you opt into the previous behavior.
+**This release is incompatible with 0.4.x.** Scoped class names and compiled CSS selectors change unless you opt into the previous behaviour.
 
 - Default `css_class_prefix` is now `"{class_name}_"` instead of `"c-"`. For example, `.component` becomes `.component_a1b2c3d4` rather than `.c-a1b2c3d4`.
 - `css_class_prefix` is a template string supporting `{class_name}` and `{component_name}` (namespaces joined by `/`). Per-component `css_class_prefix` uses the same interpolation.
