@@ -1,3 +1,19 @@
+## [0.5.0] - 2026-06-01
+
+### Breaking changes
+
+**This release is incompatible with 0.4.x.** Scoped class names and compiled CSS selectors change unless you opt into the previous behavior.
+
+- Default `css_class_prefix` is now `"{class_name}_"` instead of `"c-"`. For example, `.component` becomes `.component_a1b2c3d4` rather than `.c-a1b2c3d4`.
+- `css_class_prefix` is a template string supporting `{class_name}` and `{component_name}` (namespaces joined by `/`). Per-component `css_class_prefix` uses the same interpolation.
+- Forward slashes in interpolated class names are escaped in compiled CSS selectors (e.g. `Admin/UserCardComponent` → `Admin\/UserCardComponent`).
+
+**Upgrade from 0.4.x:** set `config.css_class_prefix = "c-"` in your initializer (and per-component overrides if any) to keep existing class names, then regenerate `components.scoped.css` in development. Otherwise update templates and markup to match the new scoped class names.
+
+### Added
+
+- `ViewComponent::ScopedStyles::CssClassPrefix` for prefix interpolation and CSS selector escaping.
+
 ## [0.4.1] - 2026-06-01
 
 ### Fixed
