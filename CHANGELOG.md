@@ -1,3 +1,9 @@
+## [0.4.1] - 2026-06-01
+
+### Fixed
+
+- Railtie component discovery now respects the configured `components_path` instead of always scanning `app/components`.
+
 ## [0.4.0] - 2026-05-31
 
 ### Added
