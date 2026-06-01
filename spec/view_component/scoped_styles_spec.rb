@@ -6,9 +6,10 @@ RSpec.describe ViewComponent::ScopedStyles do
   end
 
   describe "Configuration" do
-    it "defaults assets_path and stylesheet_name" do
+    it "defaults components_path, assets_path, and stylesheet_name" do
       config = ViewComponent::ScopedStyles::Configuration.new
 
+      expect(config.components_path).to eq(File.join("app", "components"))
       expect(config.assets_path).to eq(File.join("app", "assets", "stylesheets"))
       expect(config.stylesheet_name).to eq("components.scoped.css")
     end

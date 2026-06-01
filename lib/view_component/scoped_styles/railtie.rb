@@ -22,7 +22,11 @@ module ViewComponent
 
       class << self
         def component_path
-          Rails.root.join("app/components/**/*.rb")
+          Rails.root.join(
+            ViewComponent::ScopedStyles.configuration.components_path,
+            "**",
+            "*.rb"
+          )
         end
 
         def load_and_register_components
