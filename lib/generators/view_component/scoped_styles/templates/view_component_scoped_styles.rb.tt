@@ -1,5 +1,11 @@
 # frozen_string_literal: true
 
+# Optional ViewComponent generator settings (in config/application.rb, config/ENVIRONMENT.rb, or wherever you configure ViewComponent):
+# Ensure sidebar is enabled
+# config.view_component.generate.sidecar = true
+# Then generate stylesheets via
+# config.view_component.generate.stylesheet = true
+
 ViewComponent::ScopedStyles.configure do |config|
   # Where ViewComponent classes live (relative to Rails.root). Default: "app/components"
   config.components_path = <%= components_path_expression %>

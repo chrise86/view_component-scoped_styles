@@ -1,3 +1,9 @@
+## [Unreleased]
+
+### Added
+
+- `config.view_component.generate.stylesheet = true` to auto-generate a sidecar-compatible `.css` file when running `view_component:component`, inject `include ViewComponent::ScopedStyles`, and add `component_class` to the generated ERB template.
+
 ## [0.5.0] - 2026-06-01
 
 ### Breaking changes

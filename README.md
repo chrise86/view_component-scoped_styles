@@ -62,16 +62,33 @@ Learn more about sidecar [here](https://viewcomponent.org/guide/generators.html#
 
 ```bash
 bin/rails generate view_component:component Example title --sidecar
+```
+
+With automatic stylesheet generation enabled in `config/application.rb`, `config/ENVIRONMENT.rb`, or wherever you configure ViewComponent:
+
+```ruby
+# Ensure sidebar is enabled
+config.view_component.generate.sidecar = true
+# Then generate stylesheets via
+config.view_component.generate.stylesheet = true
+```
+
+`view_component:component` also creates the sidecar `.css` file, adds `include ViewComponent::ScopedStyles` to the component class, and sets `class="<%= component_class %>"` on the generated ERB template. You can pass `--no-stylesheet` to skip CSS generation for a single component.
+
+```bash
+bin/rails generate view_component:component Example title --sidecar
 
       create  app/components/example_component.rb
       invoke  test_unit
       create    test/components/example_component_test.rb
       invoke  erb
       create    app/components/example_component/example_component.html.erb
+      invoke  stylesheet
+      create    app/components/example_component/example_component.css
 
 ```
 
-Then add a matching stylesheet in the sidecar directory:
+Or add a matching stylesheet manually in the sidecar directory:
 
 ```css
 /* app/components/example_component/example_component.css */
