@@ -178,6 +178,32 @@ end
 </div>
 ```
 
+You can also reference scoped classes from another component by passing the component class with `from:`:
+
+```erb
+<div class="<%= component_class(from: ButtonComponent) %>">
+  Button root class
+</div>
+
+<div class="<%= component_class("icon", from: ButtonComponent) %>">
+  Button icon class
+</div>
+```
+
+Inside sidecar stylesheets or `styles` blocks, use `:component(...)` as a compile-time reference to another component's scoped classes:
+
+```css
+.component:has(:component(ButtonComponent, icon)) {
+  padding-inline-end: 2rem;
+}
+
+:where(:component(CardComponent), :component(PanelComponent)) .title {
+  margin: 0;
+}
+```
+
+The first argument is the component constant, and the optional second argument is the class selector without a leading dot. When the class name is omitted, the referenced component's root class is used. `:component(...)` is replaced while scoped CSS is generated, so it can be used inside more complex selectors like `:where()`, `:is()`, `:not()`, and `:has()`.
+
 Scoped class names are prefixed by default using the class name (e.g. `.component` → `component_a1b2c3d4`). Set a global prefix in configuration, or override per component with `css_class_prefix`.
 
 The prefix is a template string. Use `{class_name}` for the CSS class being scoped and `{component_name}` for the component name (namespaces joined by `/`, with a trailing `Component` suffix removed):

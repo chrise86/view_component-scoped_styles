@@ -34,7 +34,7 @@ RSpec.describe ViewComponent::Generators::StylesheetGenerator do
   def run_stylesheet_generator(**options)
     generator = described_class.new(
       ["Example"],
-      {sidecar: false}.merge(options),
+      { sidecar: false }.merge(options),
       destination_root: destination_root.to_s
     )
     generator.invoke_all

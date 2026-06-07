@@ -25,6 +25,6 @@ module ViewComponent
 
     mixes_in_class_methods _ClassMethods
 
-    def component_class: (?(String | Symbol) name) -> String?
+    def component_class: (?(String | Symbol) name, ?from: Class) -> String?
   end
 end

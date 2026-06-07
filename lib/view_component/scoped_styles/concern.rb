@@ -8,6 +8,15 @@ module ViewComponent
 
     CACHED_VARIABLES = %i[@component_styles @component_id @component_class_map].freeze
     CLASS_SELECTOR_PATTERN = /\.([a-zA-Z_][\w-]*)\b/
+    COMPONENT_REFERENCE_PATTERN = /
+      :component\(
+        \s*
+        (?<component_name>[A-Za-z_]\w*(?:::[A-Za-z_]\w*)*)
+        \s*
+        (?:,\s*(?<css_class>[a-zA-Z_][\w-]*)\s*)?
+      \)
+    /x
+    COMPONENT_RESOLUTION_STACK_KEY = :view_component_scoped_styles_component_resolution_stack
 
     # Default root class for +component_class+ when it matches a selector in the CSS.
     COMPONENT_CSS_CLASS = "component".freeze
@@ -115,13 +124,26 @@ module ViewComponent
       end
 
       def generate_component_styles
+        pushed = false
+
+        if component_resolution_stack.include?(self)
+          names = (component_resolution_stack + [self]).map { |component| component.name || component.inspect }
+          raise ArgumentError, "Circular scoped style component reference: #{names.join(" -> ")}"
+        end
+
+        component_resolution_stack.push(self)
+        pushed = true
         styles_content = generate_styles_content
         css_classes = extract_css_classes(styles_content)
         primary_class = primary_css_class(css_classes)
 
         @component_id = component_id_for(primary_class, styles_content)
         @component_class_map = build_component_class_map(styles_content, css_classes, primary_class)
-        @component_styles = replace_css_classes(styles_content, @component_class_map)
+        @component_styles = replace_component_references(
+          replace_css_classes(styles_content, @component_class_map)
+        )
+      ensure
+        component_resolution_stack.pop if pushed
       end
 
       def generate_styles_content
@@ -158,6 +180,17 @@ module ViewComponent
           scoped = class_map[css_class]
           escaped = CssClassPrefix.escape_for_css_selector(scoped)
           content.gsub(/\.#{Regexp.escape(css_class)}\b/, ".#{escaped}")
+        end
+      end
+
+      def replace_component_references(styles_content)
+        styles_content.gsub(COMPONENT_REFERENCE_PATTERN) do
+          component_name = Regexp.last_match[:component_name]
+          css_class = Regexp.last_match[:css_class]
+          component_class = resolve_component_reference(component_name)
+          scoped_class = scoped_component_class(component_class, css_class)
+
+          ".#{CssClassPrefix.escape_for_css_selector(scoped_class)}"
         end
       end
 
@@ -202,6 +235,36 @@ module ViewComponent
         end
       end
 
+      def resolve_component_reference(component_name)
+        component_name.to_s.split("::").inject(Object) do |namespace, constant_name|
+          namespace.const_get(constant_name)
+        end
+      rescue NameError
+        raise ArgumentError, "Unable to resolve scoped style component reference: #{component_name}"
+      end
+
+      def scoped_component_class(component_class, css_class = nil)
+        unless component_class.respond_to?(:component_styles)
+          raise ArgumentError, "#{component_class} does not include ViewComponent::ScopedStyles"
+        end
+
+        component_class.component_styles
+
+        if css_class
+          scoped = component_class.instance_variable_get(:@component_class_map)[css_class.to_s.delete_prefix(".")]
+
+          raise ArgumentError, "#{component_class.name || component_class} does not define .#{css_class}" unless scoped
+
+          scoped
+        else
+          component_class.instance_variable_get(:@component_id)
+        end
+      end
+
+      def component_resolution_stack
+        Thread.current[COMPONENT_RESOLUTION_STACK_KEY] ||= []
+      end
+
       def clear_component_style_cache
         CACHED_VARIABLES.each do |ivar|
           remove_instance_variable(ivar) if instance_variable_defined?(ivar)
@@ -215,28 +278,30 @@ module ViewComponent
     # appears in the CSS, otherwise the first class in the stylesheet).
     #
     # @param name [String, Symbol] CSS class without a leading dot (e.g. +"input-box"+)
-    def component_class(name = nil)
-      return nil unless component_has_styles? || component_has_stylesheet?
+    # @param from [Class] component class to read scoped CSS classes from
+    def component_class(name = nil, from: self.class)
+      return nil unless from.respond_to?(:component_styles)
+      return nil unless component_has_styles?(from) || component_has_stylesheet?(from)
 
-      self.class.component_styles
+      from.component_styles
 
       if name
-        class_map = self.class.instance_variable_get(:@component_class_map)
+        class_map = from.instance_variable_get(:@component_class_map)
         class_map[name.to_s.delete_prefix(".")]
       else
-        self.class.instance_variable_get(:@component_id)
+        from.instance_variable_get(:@component_id)
       end
     end
 
     private
 
-    def component_has_stylesheet?
-      self.class.has_stylesheet?
+    def component_has_stylesheet?(component_class = self.class)
+      component_class.has_stylesheet?
     end
 
-    def component_has_styles?
-      self.class.instance_variable_defined?(:@styles_block) &&
-        self.class.instance_variable_get(:@styles_block)
+    def component_has_styles?(component_class = self.class)
+      component_class.instance_variable_defined?(:@styles_block) &&
+        component_class.instance_variable_get(:@styles_block)
     end
   end
 end

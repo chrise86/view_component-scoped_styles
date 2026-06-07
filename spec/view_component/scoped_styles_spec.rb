@@ -194,4 +194,140 @@ RSpec.describe ViewComponent::ScopedStyles do
       expect(instance.component_class("scoped")).to match(/\Ascoped_[0-9a-f]{8}\z/)
     end
   end
+
+  describe "component references" do
+    let(:target_component) do
+      Class.new do
+        def self.name = "ReferencedButtonComponent"
+
+        include ViewComponent::ScopedStyles
+
+        styles do
+          <<~CSS
+            .component {
+              display: inline-flex;
+            }
+
+            .icon {
+              inline-size: 1em;
+            }
+          CSS
+        end
+      end
+    end
+
+    before do
+      stub_const("ReferencedButtonComponent", target_component)
+    end
+
+    it "returns scoped classes from another component" do
+      component_class = Class.new do
+        include ViewComponent::ScopedStyles
+
+        styles do
+          <<~CSS
+            .component {
+              color: red;
+            }
+          CSS
+        end
+      end
+
+      target_component.component_styles
+      instance = component_class.new
+
+      expect(instance.component_class(from: ReferencedButtonComponent)).to eq(
+        target_component.instance_variable_get(:@component_id)
+      )
+      expect(instance.component_class("icon", from: ReferencedButtonComponent)).to eq(
+        target_component.instance_variable_get(:@component_class_map)["icon"]
+      )
+    end
+
+    it "replaces component references in complex selectors" do
+      component_class = Class.new do
+        def self.name = "MenuComponent"
+
+        include ViewComponent::ScopedStyles
+
+        styles do
+          <<~CSS
+            .component:has(:component(ReferencedButtonComponent, icon)) {
+              gap: 0.5rem;
+            }
+
+            :where(:component(ReferencedButtonComponent), .title) {
+              color: red;
+            }
+          CSS
+        end
+      end
+
+      css = component_class.component_styles
+      target_id = target_component.instance_variable_get(:@component_id)
+      target_icon = target_component.instance_variable_get(:@component_class_map)["icon"]
+      title_class = component_class.instance_variable_get(:@component_class_map)["title"]
+
+      expect(css).to include(":has(.#{target_icon})")
+      expect(css).to include(":where(.#{target_id}, .#{title_class})")
+      expect(css).not_to include(":component(")
+    end
+
+    it "raises a helpful error for unknown referenced classes" do
+      component_class = Class.new do
+        include ViewComponent::ScopedStyles
+
+        styles do
+          <<~CSS
+            .component:has(:component(ReferencedButtonComponent, missing)) {
+              color: red;
+            }
+          CSS
+        end
+      end
+
+      expect { component_class.component_styles }.to raise_error(
+        ArgumentError,
+        /ReferencedButtonComponent does not define \.missing/
+      )
+    end
+
+    it "raises a helpful error for circular component references" do
+      first_component = Class.new do
+        def self.name = "FirstReferencedComponent"
+
+        include ViewComponent::ScopedStyles
+
+        styles do
+          <<~CSS
+            .component:has(:component(SecondReferencedComponent)) {
+              color: red;
+            }
+          CSS
+        end
+      end
+
+      second_component = Class.new do
+        def self.name = "SecondReferencedComponent"
+
+        include ViewComponent::ScopedStyles
+
+        styles do
+          <<~CSS
+            .component:has(:component(FirstReferencedComponent)) {
+              color: blue;
+            }
+          CSS
+        end
+      end
+
+      stub_const("FirstReferencedComponent", first_component)
+      stub_const("SecondReferencedComponent", second_component)
+
+      expect { first_component.component_styles }.to raise_error(
+        ArgumentError,
+        /Circular scoped style component reference: FirstReferencedComponent -> SecondReferencedComponent -> FirstReferencedComponent/
+      )
+    end
+  end
 end
