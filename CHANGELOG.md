@@ -3,6 +3,12 @@
 ### Added
 
 - `config.view_component.generate.stylesheet = true` to auto-generate a sidecar-compatible `.css` file when running `view_component:component`, inject `include ViewComponent::ScopedStyles`, and add `component_class` to the generated ERB template.
+- `component_class(..., from: OtherComponent)` to reference scoped classes from another component in templates.
+- `:component(OtherComponent[, class_name])` compile-time CSS references for sidecar stylesheets and `styles` blocks, including use inside selector functions like `:where()` and `:has()`.
+
+### Fixed
+
+- Require ActiveSupport's enumerable extensions explicitly so scoped class map generation has `index_with` available outside Rails load paths.
 
 ## [0.5.0] - 2026-06-01
 
