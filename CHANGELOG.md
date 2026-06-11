@@ -1,3 +1,9 @@
+## [0.6.1] - 2026-06-11
+
+### Fixed
+
+- Load the ViewComponent component generator hook only when Rails generators are loaded, preventing app boot failures.
+
 ## [0.6.0] - 2026-06-07
 
 ### Added
