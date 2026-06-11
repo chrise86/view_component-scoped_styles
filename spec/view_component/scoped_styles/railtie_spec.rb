@@ -1,6 +1,21 @@
 # frozen_string_literal: true
 
+require "open3"
+
 RSpec.describe ViewComponent::ScopedStyles::Railtie do
+  it "does not load component generators when the gem is required" do
+    script = <<~RUBY
+      require "bundler/setup"
+      require "view_component/scoped_styles"
+      print $LOADED_FEATURES.grep(/component_generator/).join("\\n")
+    RUBY
+
+    output, status = Open3.capture2(Gem.ruby, "-e", script)
+
+    expect(status).to be_success
+    expect(output).to be_empty
+  end
+
   describe ".component_path" do
     let(:rails_root) { Pathname.new("/tmp/myapp") }
 

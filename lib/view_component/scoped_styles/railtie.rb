@@ -6,7 +6,7 @@ require "rails/railtie"
 module ViewComponent
   module ScopedStyles
     class Railtie < Rails::Railtie
-      initializer "view_component.scoped_styles.component_generator_hook" do
+      generators do
         require_relative "component_generator_hook"
       end
 
