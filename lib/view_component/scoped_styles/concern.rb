@@ -7,7 +7,7 @@ module ViewComponent
     extend ActiveSupport::Concern
 
     CACHED_VARIABLES = %i[@component_styles @component_id @component_class_map].freeze
-    CLASS_SELECTOR_PATTERN = /\.([a-zA-Z_][\w-]*)\b/
+    DEPRECATOR = ActiveSupport::Deprecation.new("a future release", "ViewComponent::ScopedStyles")
     COMPONENT_REFERENCE_PATTERN = /
       :component\(
         \s*
@@ -52,7 +52,12 @@ module ViewComponent
       # Clears cached generated styles when the list changes.
       #
       # @param classes [String, Symbol] selector names without a leading dot
+      # @deprecated Wrap selectors in +:global(...)+ in the stylesheet instead.
       def ignored_css_classes(*classes)
+        DEPRECATOR.warn(
+          "ignored_css_classes is deprecated. Use :global(...) in your CSS instead, " \
+          "for example :global(.active)."
+        )
         if classes.any?
           names = classes.flatten.map { |css_class| css_class.to_s.delete_prefix(".") }
           const_set(:IGNORED_CSS_CLASSES, names.freeze)
@@ -134,13 +139,15 @@ module ViewComponent
         component_resolution_stack.push(self)
         pushed = true
         styles_content = generate_styles_content
-        css_classes = extract_css_classes(styles_content)
-        primary_class = primary_css_class(css_classes)
+        selectors = CssSelectors.new(styles_content)
+        css_classes = selectors.local_classes
+        primary_class = primary_css_class(css_classes + selectors.global_classes)
 
-        @component_id = component_id_for(primary_class, styles_content)
         @component_class_map = build_component_class_map(styles_content, css_classes, primary_class)
+        selectors.global_classes.each { |name| @component_class_map[name] ||= name }
+        @component_id = @component_class_map[primary_class]
         @component_styles = replace_component_references(
-          replace_css_classes(styles_content, @component_class_map)
+          selectors.render(@component_class_map)
         )
       ensure
         component_resolution_stack.pop if pushed
@@ -148,10 +155,6 @@ module ViewComponent
 
       def generate_styles_content
         @styles_block ? @styles_block.call : File.read(stylesheet_path)
-      end
-
-      def extract_css_classes(styles_content)
-        styles_content.scan(CLASS_SELECTOR_PATTERN).flatten.uniq
       end
 
       def primary_css_class(css_classes)
@@ -169,20 +172,6 @@ module ViewComponent
         end
       end
 
-      def replace_css_classes(styles_content, class_map)
-        scoped_map = class_map.reject do |css_class, scoped|
-          css_class == scoped
-        end
-
-        sorted_classes = scoped_map.keys.sort_by(&:length).reverse
-
-        sorted_classes.reduce(styles_content) do |content, css_class|
-          scoped = class_map[css_class]
-          escaped = CssClassPrefix.escape_for_css_selector(scoped)
-          content.gsub(/\.#{Regexp.escape(css_class)}\b/, ".#{escaped}")
-        end
-      end
-
       def replace_component_references(styles_content)
         styles_content.gsub(COMPONENT_REFERENCE_PATTERN) do
           component_name = Regexp.last_match[:component_name]
@@ -191,14 +180,6 @@ module ViewComponent
           scoped_class = scoped_component_class(component_class, css_class)
 
           ".#{CssClassPrefix.escape_for_css_selector(scoped_class)}"
-        end
-      end
-
-      def component_id_for(primary_class, styles_content)
-        if ignored_css_class?(primary_class)
-          primary_class
-        else
-          generate_scoped_class_id(styles_content, primary_class, primary_class)
         end
       end
 
@@ -275,7 +256,8 @@ module ViewComponent
     # Scoped CSS class for a selector (e.g. +"c-99d08d5a"+).
     #
     # With no argument, returns the scoped root class ({COMPONENT_CSS_CLASS} when it
-    # appears in the CSS, otherwise the first class in the stylesheet).
+    # appears in the CSS, otherwise the first local class, or the first global
+    # class when the stylesheet has no local classes).
     #
     # @param name [String, Symbol] CSS class without a leading dot (e.g. +"input-box"+)
     # @param from [Class] component class to read scoped CSS classes from

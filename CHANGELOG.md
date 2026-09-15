@@ -1,3 +1,18 @@
+## [Unreleased]
+
+### Added
+
+- CSS Modules-style `:global(...)` and bare `:global` for unscoped class selectors, with `:local(...)` and bare `:local` to restore local scope. Supports nested selector functions and CSS rules in sidecar stylesheets and `styles` blocks.
+- `component_class` returns original names for classes used only in global scope and scoped names for classes with local occurrences.
+
+### Deprecated
+
+- `ignored_css_classes` now emits an ActiveSupport deprecation warning. Replace the Ruby declaration with `:global(...)` around each affected selector occurrence. Existing declarations continue to work.
+
+### Fixed
+
+- Class scoping leaves comments, attribute values, and declarations unchanged.
+
 ## [0.6.1] - 2026-06-11
 
 ### Fixed

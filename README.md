@@ -15,7 +15,7 @@ E.g. `.button` becomes `.button_a1b2c3d4`
     - [1. Using a sidecar stylesheet](#1-using-a-sidecar-stylesheet)
     - [2. Using a styles block in the component](#2-using-a-styles-block-in-the-component)
     - [Referencing classes](#referencing-classes)
-    - [Ignoring classes](#ignoring-classes)
+    - [Global classes](#global-classes)
     - [Using the scoped CSS](#using-the-scoped-css)
   - [Configuration](#configuration)
   - [Related projects](#related-projects)
@@ -248,32 +248,72 @@ end
 
 **Upgrading from 0.4.x:** set `config.css_class_prefix = "c-"` (and per-component overrides) to keep the previous `c-a1b2c3d4` class names without updating templates.
 
-### Ignoring classes
+### Global classes
 
-Ignored classes are left unchanged in generated CSS:
+Use CSS Modules-style `:global(...)` to leave class selectors unchanged in a sidecar stylesheet or `styles` block:
 
-```ruby
-class ExampleComponent < ViewComponent::Base
-  include ViewComponent::ScopedStyles
+```css
+.component:global(.is-open) {
+  display: block;
+}
 
-  ignored_css_classes "is-open", "active"
-
-  styles do
-    <<~CSS
-      .component { ... }
-      .is-open { ... }  # stays .is-open in components.scoped.css
-    CSS
-  end
-end
+:global(.active) .label {
+  font-weight: bold;
+}
 ```
-In your view, you can either reference the class directly:
+
+The compiler removes `:global(...)` and leaves its contents unscoped. In these examples, `.component` and `.label` get scoped names, while `.is-open` and `.active` stay unchanged. Nested selector functions work too:
+
+```css
+.component:has(:global(.external:not(.disabled))) {
+  border-color: green;
+}
+```
+
+Bare `:global` makes the rest of the current selector global. Use `:local(...)` for a local selector within it, or bare `:local` to switch back. Scope resets at each comma, at the end of a selector function, and for each new rule.
+
+```css
+.component :global .external .icon :local(.label) {
+  color: red;
+}
+```
+
+For selector lists, write `:global(.first), :global(.second)`. Lists inside a single `:global(...)` are not supported.
+
+Global scope applies to each occurrence. A class can be global in one selector and local in another. `component_class("name")` returns the scoped name when there is a local occurrence, or the original name when every occurrence is global. The root helper uses the configured root class when present, otherwise the first local class, or the first global class if there are no local classes.
+
+In your view, reference a global class directly:
+
 ```erb
 <div class="<%= component_class %> is-open">
 ```
-or via the `component_class` helper:
+
+Or use the helper for a class that appears only in global scope:
+
 ```erb
 <div class="<%= component_class %> <%= component_class("is-open") %>">
 ```
+
+#### Migrating from ignored_css_classes
+
+`ignored_css_classes` is deprecated and emits an ActiveSupport deprecation warning. It continues to leave every occurrence of the listed classes unchanged, including their helper results.
+
+Remove the Ruby declaration and wrap each occurrence of those classes in `:global(...)`:
+
+```ruby
+# Remove this from your component:
+ignored_css_classes "is-open", "active"
+```
+
+```css
+/* Before */
+.component.is-open .active { color: red; }
+
+/* After */
+.component:global(.is-open) :global(.active) { color: red; }
+```
+
+Regenerate the bundled stylesheet after migrating. Scoped names are content-derived, so changing the CSS changes their hashes.
 
 ### Using the scoped CSS
 
