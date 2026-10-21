@@ -23,6 +23,21 @@ module ViewComponent
     IGNORED_CSS_CLASSES = [].freeze
 
     class_methods do
+      # Selects an output bundle, written as <name>.scoped.css in assets_path.
+      # Subclasses inherit this choice unless they specify their own bundle.
+      def stylesheet(name = nil)
+        if name
+          @scoped_stylesheet = name.to_s
+          register_styles_if_rails_loaded
+        end
+
+        if defined?(@scoped_stylesheet)
+          @scoped_stylesheet
+        elsif superclass.respond_to?(:stylesheet)
+          superclass.stylesheet
+        end
+      end
+
       # Sets which CSS class is the root for +component_class+ (no argument).
       # Also triggers style registration in development when Rails is loaded
       # (registration also runs via the Railtie for all styled components).

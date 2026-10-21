@@ -9,6 +9,9 @@ module ViewComponent
         end
 
         def print!(component_class)
+          bundle = component_class.stylesheet
+          filename = bundle ? "#{bundle}.scoped.css" : config.stylesheet_name
+          @stylesheet_path = Rails.root.join(config.assets_path, filename)
           component_name = component_class.name
           component_class.instance_variable_get(:@component_id)
           styles = component_class.component_styles
@@ -29,6 +32,7 @@ module ViewComponent
 
         def update_stylesheet_with(component_name, styles)
           content = File.read(stylesheet_path)
+          content = content.sub(/\n\}\s*\z/, "\n") if config.components_layer
           updated_content = merge_styles_into(content, component_name, styles)
 
           write_atomically(updated_content)
@@ -91,11 +95,7 @@ module ViewComponent
           content
         end
 
-        def stylesheet_path
-          @stylesheet_path ||= begin
-            Rails.root.join(config.assets_path, config.stylesheet_name)
-          end
-        end
+        attr_reader :stylesheet_path
 
         def config
           @config ||= ViewComponent::ScopedStyles.configuration
