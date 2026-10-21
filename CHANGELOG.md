@@ -1,5 +1,7 @@
 ## [Unreleased]
 
+## [0.8.0] - 2026-10-21
+
 ### Added
 
 - Per-component `stylesheet "name"` to compile components into separate or shared output stylesheets, automatically appending `.scoped.css`, with inheritance and the configured default as fallback.
