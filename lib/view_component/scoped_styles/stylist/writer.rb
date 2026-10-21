@@ -16,9 +16,12 @@ module ViewComponent
           component_class.instance_variable_get(:@component_id)
           styles = component_class.component_styles
 
-          ensure_stylesheet_exists!
-
-          update_stylesheet_with(component_name, styles)
+          FileUtils.mkdir_p(File.dirname(stylesheet_path))
+          File.open("#{stylesheet_path}.lock", "a") do |lock|
+            lock.flock(File::LOCK_EX)
+            ensure_stylesheet_exists!
+            update_stylesheet_with(component_name, styles)
+          end
         end
 
         private
@@ -26,7 +29,6 @@ module ViewComponent
         def ensure_stylesheet_exists!
           return if File.exist?(stylesheet_path)
 
-          FileUtils.mkdir_p(File.dirname(stylesheet_path))
           File.write(stylesheet_path, initial_content)
         end
 

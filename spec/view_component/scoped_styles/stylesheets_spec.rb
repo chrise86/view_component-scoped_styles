@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require "tmpdir"
+require "timeout"
 
 RSpec.describe "Component output stylesheets" do
   before do
@@ -76,6 +77,59 @@ RSpec.describe "Component output stylesheets" do
       "/* First */\n#{first.component_styles}/* /First */\n" \
       "/* Second */\n#{second.component_styles}/* /Second */\n}\n"
     )
+  end
+
+  it "preserves both components when processes update the same bundle" do
+    first = component("First", "shared")
+    second = component("Second", "shared", ".component { color: blue; }")
+    stylesheet = output("shared.scoped.css")
+    FileUtils.mkdir_p(stylesheet.dirname)
+    stylesheet.write("/* initial */\n")
+    ready_reader, ready_writer = IO.pipe
+    release_reader, release_writer = IO.pipe
+    done_reader, done_writer = IO.pipe
+    children = []
+
+    children << fork do
+      allow(File).to receive(:read).and_wrap_original do |read, *args|
+        content = read.call(*args)
+        if args.first == stylesheet
+          ready_writer.write("r")
+          release_reader.read(1)
+        end
+        content
+      end
+      ViewComponent::ScopedStyles::Stylist::Writer.print(first)
+      exit! 0
+    end
+
+    Timeout.timeout(5) do
+      ready_reader.read(1)
+      children << fork do
+        ready_writer.write("r")
+        ViewComponent::ScopedStyles::Stylist::Writer.print(second)
+        done_writer.write("d")
+        exit! 0
+      end
+      ready_reader.read(1)
+      IO.select([done_reader], nil, nil, 0.2)
+      release_writer.write("r")
+      statuses = children.map { Process.wait2(_1).last }
+      children.clear
+      expect(statuses).to all(be_success)
+    end
+
+    expect(stylesheet.read).to include(
+      "/* First */", first.component_styles,
+      "/* Second */", second.component_styles
+    )
+  ensure
+    children&.each do |pid|
+      Process.kill("KILL", pid)
+      Process.wait(pid)
+    end
+    [ready_reader, ready_writer, release_reader, release_writer,
+      done_reader, done_writer].compact.each(&:close)
   end
 
   it "uses the same output selection for sidecar styles" do

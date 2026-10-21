@@ -1,5 +1,10 @@
 ## [Unreleased]
 
+### Fixed
+
+- Preserve all component styles when multiple Rails processes update the same
+  stylesheet concurrently.
+
 ## [0.8.0] - 2026-10-21
 
 ### Added
