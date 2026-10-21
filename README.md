@@ -17,6 +17,7 @@ E.g. `.button` becomes `.button_a1b2c3d4`
     - [Referencing classes](#referencing-classes)
     - [Global classes](#global-classes)
     - [Using the scoped CSS](#using-the-scoped-css)
+    - [Multiple stylesheets](#multiple-stylesheets)
   - [Configuration](#configuration)
   - [Related projects](#related-projects)
   - [Development](#development)
@@ -317,7 +318,7 @@ Regenerate the bundled stylesheet after migrating. Scoped names are content-deri
 
 ### Using the scoped CSS
 
-All scoped CSS will be compiled into a single bundled stylesheet. By default that is `app/assets/stylesheets/components.scoped.css`; both the directory and filename are configurable (see [Configuration](#configuration)).
+Scoped CSS is compiled into `app/assets/stylesheets/components.scoped.css` by default. Components can select a different output bundle with `stylesheet`. The default stylesheet is `app/assets/stylesheets/components.scoped.css`; both the directory and filename are configurable (see [Configuration](#configuration)).
 
 You should import this stylesheet within your app:
 
@@ -326,6 +327,38 @@ You should import this stylesheet within your app:
 
 @import url("./components.scoped.css");
 ```
+
+### Multiple stylesheets
+
+Set `stylesheet` before declaring a `styles` block to choose the component's output bundle. The gem appends `.scoped.css` to the name. This also works with sidecar CSS:
+
+```ruby
+class Admin::ButtonComponent < ViewComponent::Base
+  include ViewComponent::ScopedStyles
+
+  stylesheet "admin"
+
+  styles do
+    ".component { color: blue; }"
+  end
+end
+
+class Admin::CardComponent < ViewComponent::Base
+  include ViewComponent::ScopedStyles
+
+  stylesheet "admin"
+end
+```
+
+Both components compile into `app/assets/stylesheets/admin.scoped.css`. Any number of components can use the same bundle name. Components without a selection use `config.stylesheet_name`. Subclasses inherit their parent's selection and can override it.
+
+All output files use `config.assets_path` and, when configured, `config.components_layer`. Include each bundle where you need it:
+
+```erb
+<%= stylesheet_link_tag "admin.scoped", "data-turbo-track": "reload" %>
+```
+
+Cross-component class references still work across bundles. Load both bundles when both components' styles are needed. When moving an existing component between bundles, remove its marked CSS block from the old generated file, since registration updates the selected file only.
 
 ## Configuration
 

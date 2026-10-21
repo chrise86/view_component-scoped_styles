@@ -1,3 +1,13 @@
+## [Unreleased]
+
+### Added
+
+- Per-component `stylesheet "name"` to compile components into separate or shared output stylesheets, automatically appending `.scoped.css`, with inheritance and the configured default as fallback.
+
+### Fixed
+
+- Keep subsequent component registrations inside the configured CSS cascade layer.
+
 ## [0.7.0] - 2026-09-15
 
 ### Added
