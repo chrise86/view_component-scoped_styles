@@ -1,5 +1,7 @@
 ## [Unreleased]
 
+## [0.8.1] - 2026-10-21
+
 ### Fixed
 
 - Preserve all component styles when multiple Rails processes update the same
