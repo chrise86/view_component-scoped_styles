@@ -6,8 +6,18 @@ require "rails/railtie"
 module ViewComponent
   module ScopedStyles
     class Railtie < Rails::Railtie
-      generators do
+      generators do |app|
         require_relative "component_generator_hook"
+
+        options = app.config.generators.options
+        namespace = %i[component view_component rails].find do |name|
+          options.fetch(name, {}).key?(:stylesheet)
+        end
+        default = namespace ? options[namespace][:stylesheet] : true
+
+        ViewComponent::Generators::ComponentGenerator.class_option(
+          :stylesheet, type: :boolean, default: default
+        )
       end
 
       config.after_initialize do

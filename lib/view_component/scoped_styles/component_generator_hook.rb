@@ -6,7 +6,7 @@ require "generators/view_component/component/component_generator"
 module ViewComponent
   module Generators
     class ComponentGenerator
-      class_option :stylesheet, type: :boolean, default: false
+      class_option :stylesheet, type: :boolean, default: true
 
       hook_for :stylesheet, type: :boolean
     end

@@ -26,6 +26,8 @@ RSpec.describe ViewComponent::ScopedStyles::Generators::InstallGenerator do
     expect(initializer_path).to exist
 
     content = initializer_path.read
+    expect(content).to include("g.component stylesheet: false")
+    expect(content).not_to include("config.view_component.generate.stylesheet")
     defaults = ViewComponent::ScopedStyles::Configuration.new
 
     expect(content).to include(

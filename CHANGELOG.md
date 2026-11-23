@@ -1,5 +1,23 @@
 ## [Unreleased]
 
+## [0.8.3] - 2026-11-23
+
+### Changed
+
+- Generate scoped stylesheets by default with `view_component:component`.
+  Disable them with `--no-stylesheet` or `g.component stylesheet: false` in
+  `config.generators`.
+
+### Fixed
+
+- Read stylesheet generator defaults from the app's `config.generators` before
+  Rails loads generator configuration. Use `g.component stylesheet: true`, or
+  `g.view_component stylesheet: true`. Component settings take precedence,
+  including explicit `false` values. Command-line flags still override defaults.
+- Correct the install template to use `config.generators` instead of
+  `config.view_component.generate.stylesheet`, which ViewComponent 4.21 and later
+  reject.
+
 ## [0.8.2] - 2026-11-23
 
 ### Fixed
