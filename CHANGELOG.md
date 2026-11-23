@@ -1,5 +1,14 @@
 ## [Unreleased]
 
+## [0.8.2] - 2026-11-23
+
+### Fixed
+
+- Configure automatic stylesheet generation with
+  `config.generators { |g| g.view_component stylesheet: true }` instead of the
+  unsupported `config.view_component.generate.stylesheet` option. Remove the old
+  setting from existing apps when upgrading.
+
 ## [0.8.1] - 2026-10-21
 
 ### Fixed

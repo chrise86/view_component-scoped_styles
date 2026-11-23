@@ -70,11 +70,17 @@ With automatic stylesheet generation enabled in `config/application.rb`, `config
 ```ruby
 # Ensure sidebar is enabled
 config.view_component.generate.sidecar = true
-# Then generate stylesheets via
-config.view_component.generate.stylesheet = true
+# Generate scoped stylesheets alongside components
+config.generators do |g|
+  g.view_component stylesheet: true
+end
 ```
 
 `view_component:component` also creates the sidecar `.css` file, adds `include ViewComponent::ScopedStyles` to the component class, and sets `class="<%= component_class %>"` on the generated ERB template. You can pass `--no-stylesheet` to skip CSS generation for a single component.
+
+Replace `config.view_component.generate.stylesheet = true` in existing apps with
+the `config.generators` block above. ViewComponent does not support a `stylesheet`
+configuration option and rejects it in versions with strict configuration validation.
 
 ```bash
 bin/rails generate view_component:component Example title --sidecar
