@@ -10,11 +10,16 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    name: Ruby ${{ matrix.ruby }}
+    name: Ruby ${{ matrix.ruby }}, ViewComponent ${{ matrix.view_component }}
+    env:
+      VIEW_COMPONENT_VERSION: ${{ matrix.view_component }}
     strategy:
       matrix:
         ruby:
           - '4.0.10'
+        view_component:
+          - '4.20.0'
+          - '4.25.0'
 
     steps:
       - uses: actions/checkout@v4
@@ -24,6 +29,8 @@ jobs:
         uses: ruby/setup-ruby@v1
         with:
           ruby-version: ${{ matrix.ruby }}
-          bundler-cache: true
+          bundler-cache: false
+      - name: Install compatibility dependencies
+        run: bundle update view_component
       - name: Run the default task
         run: bundle exec rake
